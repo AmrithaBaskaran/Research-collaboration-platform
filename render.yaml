@@ -4,8 +4,10 @@ services:
     runtime: python
     plan: free
     buildCommand: ./build.sh
-    startCommand: gunicorn main:app
+    startCommand: flask db upgrade && gunicorn main:app
     envVars:
+      - key: FLASK_APP
+        value: main.py
       - key: APP_SETTINGS
         value: config.ProductionConfig
       - key: SECRET_KEY
