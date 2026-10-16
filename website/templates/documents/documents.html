@@ -1,0 +1,167 @@
+{% extends "_base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('core.home') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('projects.projects') }}">Projects</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('projects.project_details', project_id=project.id) }}">{{ project.name }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Document Library</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-1 fw-bold text-dark">{{ project.name }} — Research Document Library</h1>
+            <p class="text-muted mb-0">
+                Shared research literature, papers, data files, and conference submissions.
+            </p>
+        </div>
+
+        <div>
+            <a
+                href="{{ url_for('documents.upload_document', project_id=project.id) }}"
+                class="btn btn-primary shadow-sm"
+            >
+                <i class="bi bi-cloud-arrow-up me-1"></i> Upload Research Paper / File
+            </a>
+        </div>
+    </div>
+
+    {% if documents %}
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="min-width: 280px;">Document / Paper Title</th>
+                        <th>Type</th>
+                        <th>Uploaded By</th>
+                        <th>Upload Date</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for document in documents %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-start gap-2">
+                                <div class="mt-1">
+                                    {% if document.is_pdf %}
+                                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                                    {% elif 'zip' in document.file_type or document.filename.endswith('.zip') %}
+                                        <i class="bi bi-file-earmark-zip-fill text-warning fs-4"></i>
+                                    {% elif 'image' in document.file_type or document.filename.lower().endswith(('.png', '.jpg', '.jpeg')) %}
+                                        <i class="bi bi-file-earmark-image-fill text-primary fs-4"></i>
+                                    {% else %}
+                                        <i class="bi bi-file-earmark-text-fill text-secondary fs-4"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('documents.document_details', document_id=document.id) }}" class="fw-bold text-decoration-none text-dark d-block">
+                                        {{ document.display_title }}
+                                    </a>
+                                    {% if document.paper_title and document.paper_title != document.filename %}
+                                        <small class="text-muted d-block">{{ document.filename }}</small>
+                                    {% endif %}
+                                    {% if document.paper_authors and document.paper_authors != "Not specified" %}
+                                        <small class="text-secondary d-block"><i class="bi bi-people me-1"></i>{{ document.paper_authors }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            {% if document.is_pdf %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">PDF</span>
+                                {% if document.page_count %}
+                                    <small class="text-muted d-block mt-1">{{ document.page_count }} pages</small>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ document.file_type }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <small class="fw-medium text-dark">{{ document.uploader.email }}</small>
+                        </td>
+
+                        <td>
+                            <small class="text-muted">{{ document.upload_date.strftime("%b %d, %Y · %H:%M") }}</small>
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a
+                                    href="{{ url_for('documents.document_details', document_id=document.id) }}"
+                                    class="btn btn-outline-primary"
+                                    title="View Extracted Metadata & Insights"
+                                >
+                                    <i class="bi bi-eye"></i> Insights
+                                </a>
+
+                                <a
+                                    href="{{ url_for('documents.download_document', document_id=document.id) }}"
+                                    class="btn btn-outline-success {% if not can_delete %}rounded-end{% endif %}"
+                                    title="Download File"
+                                >
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+
+                                {% if can_delete %}
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('documents.delete_document', document_id=document.id) }}"
+                                    style="display: inline;"
+                                >
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button
+                                        type="submit"
+                                        class="btn btn-outline-danger btn-sm rounded-0 rounded-end"
+                                        onclick="return confirm('Are you sure you want to delete {{ document.filename }}?');"
+                                        title="Delete File"
+                                    >
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card shadow-sm border-0 p-5 text-center bg-light">
+        <div class="mb-3">
+            <i class="bi bi-folder-x text-muted" style="font-size: 3rem;"></i>
+        </div>
+        <h4 class="fw-bold text-secondary">No Research Documents Uploaded Yet</h4>
+        <p class="text-muted mx-auto" style="max-width: 500px;">
+            Upload research papers (PDF), experimental datasets, images, or project documentation to collaborate seamlessly with your team.
+        </p>
+        <div>
+            <a
+                href="{{ url_for('documents.upload_document', project_id=project.id) }}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-cloud-arrow-up me-1"></i> Upload First Document
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a
+            href="{{ url_for('projects.project_details', project_id=project.id) }}"
+            class="btn btn-outline-secondary"
+        >
+            &larr; Back to Research Project
+        </a>
+    </div>
+
+</div>
+{% endblock %}

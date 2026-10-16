@@ -1,0 +1,227 @@
+{% extends "_base.html" %} {% block css %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='styles/projects/project_requests.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="container">
+    <h1 class="mb-4 text-center">Requests and Invites</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="requests-section">
+                <h2>Outgoing Requests</h2>
+                {% if outgoing_requests %}
+                <ul class="list-group">
+                    {% for request in outgoing_requests %}
+                    <li class="list-group-item">
+                        <div class="request-details">
+                            <p>
+                                <strong>Project:</strong> {{
+                                request.project.name }}
+                            </p>
+                            <p><strong>Status:</strong> {{ request.status }}</p>
+                            <p><strong>Role:</strong> {{ request.role }}</p>
+                        </div>
+                        <div class="request-actions">
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#outgoingModal{{ request.id }}"
+                            >
+                                View
+                            </button>
+                            <p class="outgoing-text ms-2">Outgoing</p>
+                        </div>
+
+                        <!-- Outgoing Request Modal -->
+                        <div class="modal fade" id="outgoingModal{{ request.id }}" tabindex="-1" aria-labelledby="outgoingModalLabel{{ request.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title fw-bold" id="outgoingModalLabel{{ request.id }}">
+                                            Request Details
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <div class="mb-3">
+                                            <strong class="text-muted small text-uppercase d-block">Project:</strong>
+                                            <span class="fs-6 fw-semibold text-dark">{{ request.project.name }}</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong class="text-muted small text-uppercase d-block">
+                                                {% if request.sender_type == 'user' %}
+                                                    Sent To (Project Lead):
+                                                {% else %}
+                                                    Invited Researcher:
+                                                {% endif %}
+                                            </strong>
+                                            <span class="text-dark">{{ request.user.email if request.user else ('User #' ~ request.user_id) }}</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong class="text-muted small text-uppercase d-block">Role:</strong>
+                                            <span>{{ request.role or "Member" }}</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong class="text-muted small text-uppercase d-block">Status:</strong>
+                                            <span>{{ request.status | capitalize }}</span>
+                                        </div>
+                                        {% if request.message %}
+                                        <div class="mb-0">
+                                            <strong class="text-muted small text-uppercase d-block mb-1">Collaboration Statement / Methodology Fit:</strong>
+                                            <div class="p-3 bg-light rounded border text-dark" style="white-space: pre-line;">
+                                                {{ request.message }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="no-requests">You have no outgoing requests.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="requests-section">
+                <h2>Incoming Requests</h2>
+                {% if incoming_requests %}
+                <ul class="list-group">
+                    {% for request in incoming_requests %}
+                    <li class="list-group-item">
+                        <div class="request-details">
+                            <p>
+                                <strong>Project:</strong> {{
+                                request.project.name }}
+                            </p>
+                            <p><strong>Status:</strong> {{ request.status }}</p>
+                            <p><strong>Role:</strong> {{ request.role }}</p>
+                        </div>
+                        <div class="request-actions">
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#incomingModal{{ request.id }}"
+                            >
+                                View
+                            </button>
+                            <form
+                                method="POST"
+                                action="{{ url_for('projects.accept_join_request', request_id=request.id) }}"
+                            >
+                                {{ accept_form.csrf_token }}
+                                <input
+                                    type="hidden"
+                                    name="sender_id"
+                                    value="{{ request.sender_id }}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="sender_type"
+                                    value="{{ request.sender_type }}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="role"
+                                    value="{{ request.role }}"
+                                />
+                                <button type="submit" class="btn btn-success">
+                                    Accept
+                                </button>
+                            </form>
+                            <form
+                                method="POST"
+                                action="{{ url_for('projects.reject_join_request', request_id=request.id) }}"
+                            >
+                                {{ reject_form.csrf_token }}
+                                <input
+                                    type="hidden"
+                                    name="sender_id"
+                                    value="{{ request.sender_id }}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="sender_type"
+                                    value="{{ request.sender_type }}"
+                                />
+                                <button type="submit" class="btn btn-danger">
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Incoming Request Modal -->
+                        <div class="modal fade" id="incomingModal{{ request.id }}" tabindex="-1" aria-labelledby="incomingModalLabel{{ request.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title fw-bold" id="incomingModalLabel{{ request.id }}">
+                                            Request Details
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <div class="mb-3">
+                                            <strong class="text-muted small text-uppercase d-block">Project:</strong>
+                                            <span class="fs-6 fw-semibold text-dark">{{ request.project.name }}</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong class="text-muted small text-uppercase d-block">
+                                                {% if request.sender_type == 'user' %}
+                                                    Applicant Email:
+                                                {% else %}
+                                                    Invited By (Project Lead):
+                                                {% endif %}
+                                            </strong>
+                                            <span class="text-dark fw-medium">
+                                                {{ request.sender.email if request.sender else ('User #' ~ request.sender_id) }}
+                                            </span>
+                                        </div>
+                                        {% if request.sender and request.sender.profile and request.sender.profile.full_name and request.sender.profile.full_name != 'User User' %}
+                                        <div class="mb-3">
+                                            <strong class="text-muted small text-uppercase d-block">Applicant Name:</strong>
+                                            <span class="text-dark">{{ request.sender.profile.full_name }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <div class="mb-3">
+                                            <strong class="text-muted small text-uppercase d-block">Role:</strong>
+                                            <span>{{ request.role or "Member" }}</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong class="text-muted small text-uppercase d-block">Status:</strong>
+                                            <span>{{ request.status | capitalize }}</span>
+                                        </div>
+                                        <div class="mb-0">
+                                            <strong class="text-muted small text-uppercase d-block mb-1">Collaboration Statement / Methodology Fit:</strong>
+                                            <div class="p-3 bg-light rounded border text-dark" style="white-space: pre-line; line-height: 1.5;">
+                                                {{ request.message or "No collaboration statement provided." }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="no-requests">You have no incoming requests.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

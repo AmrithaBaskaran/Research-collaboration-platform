@@ -1,0 +1,52 @@
+<!-- website/templates/projects/create_project.html -->
+{% extends "_base.html" %} {% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title text-center">Create Project</h1>
+                </div>
+                <div class="card-body">
+                    <form
+                        method="POST"
+                        action="{{ url_for('projects.create_project') }}"
+                    >
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name:</label>
+                            {{ form.name(class="form-control", id="name") }} {%
+                            for error in form.name.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label"
+                                >Description:</label
+                            >
+                            {{ form.description(class="form-control",
+                            id="description") }} {% for error in
+                            form.description.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="visibility" class="form-label"
+                                >visibility:</label
+                            >
+                            {{ form.visibility(class="form-control",
+                            id="description") }} {% for error in
+                            form.description.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            Create
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

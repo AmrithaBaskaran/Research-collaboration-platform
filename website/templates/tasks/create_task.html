@@ -1,0 +1,80 @@
+<!-- website/templates/tasks/create_task.html -->
+{% extends "_base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('core.home') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('projects.projects') }}">My Projects</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('projects.project_details', project_id=project.id) }}">{{ project.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Create Task</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 bg-white">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="card-title mb-0 fw-bold text-white">
+                        <i class="bi bi-plus-circle me-2"></i>Create Task: {{ project.name }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form
+                        method="POST"
+                        action="{{ url_for('projects.create_task', project_id=project.id) }}"
+                    >
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-bold small text-muted">Task Name / Milestone</label>
+                            {{ form.name(class="form-control", placeholder="e.g. Literature Review on Multi-Agent Systems") }}
+                            {% for error in form.name.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold small text-muted">Task Description</label>
+                            {{ form.description(class="form-control", rows="4", placeholder="Detailed instructions, scope, benchmarks, or goals...") }}
+                            {% for error in form.description.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label fw-bold small text-muted">Status</label>
+                                {{ form.status(class="form-select") }}
+                                {% for error in form.status.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="role" class="form-label fw-bold small text-muted">Assigned Role / Functional Area</label>
+                                {{ form.role(class="form-select") }}
+                                {% for error in form.role.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="project_id" value="{{ project.id }}" />
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a href="{{ url_for('projects.project_details', project_id=project.id) }}" class="btn btn-outline-secondary btn-sm">
+                                &larr; Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-sm px-4">
+                                <i class="bi bi-plus-lg me-1"></i>Create Task
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

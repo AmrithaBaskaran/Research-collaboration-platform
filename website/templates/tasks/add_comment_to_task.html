@@ -1,0 +1,49 @@
+<!-- website/templates/tasks/add_comment_to_task.html -->
+{% extends "_base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('core.home') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('projects.projects') }}">My Projects</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('projects.project_details', project_id=project.id) }}">{{ project.name }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('projects.view_task_details', project_id=project.id, task_id=task.id) }}">Discussion: {{ task.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Add Comment</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 bg-white">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="card-title mb-0 fw-bold text-white">
+                        <i class="bi bi-chat-dots me-2"></i>Add Discussion Comment: {{ task.name }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="text" class="form-label fw-bold small text-muted">Comment / Update:</label>
+                            {{ form.text(class="form-control", rows="4", placeholder="Share research findings, progress notes, or questions...") }}
+                            {% for error in form.text.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('projects.view_task_details', project_id=project.id, task_id=task.id) }}" class="btn btn-outline-secondary btn-sm">
+                                &larr; Back to Discussion
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-sm px-4">
+                                <i class="bi bi-send me-1"></i> Post Comment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
