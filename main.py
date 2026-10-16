@@ -12,6 +12,16 @@ from dotenv import load_dotenv
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
 
+if os.environ.get("FLASK_ENV") != "testing":
+    with app.app_context():
+        try:
+            db.create_all()
+            if not User.query.filter_by(email="mokshita@vit.ac.in").first():
+                print("Demo accounts not found. Auto-seeding initial database...")
+                import seed_demo_data
+        except Exception as e:
+            print(f"Database auto-seed note: {e}")
+
 
 @app.cli.command("test")
 def test():
