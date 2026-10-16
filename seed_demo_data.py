@@ -7,11 +7,19 @@ from website.projects.models import Project, ProjectMember, Task, Comment, JoinR
 from website.documents.models import Document
 from website.documents.extractor import extract_pdf_metadata
 
+import sys
+
 with app.app_context():
-    # Clean existing data if any
-    db.drop_all()
     db.create_all()
-    print("Database reset and tables created.")
+    existing_user = User.query.filter_by(email="mokshita@vit.ac.in").first()
+    if existing_user:
+        if "--reset" not in sys.argv and "--force" not in sys.argv:
+            print("Demo accounts already exist. Skipping seeding.")
+            sys.exit(0)
+        print("Reset flag detected. Dropping existing tables and resetting...")
+        db.drop_all()
+        db.create_all()
+    print("Database tables initialized.")
 
     # 1. Create Users
     u1 = User(email="mokshita@vit.ac.in", password="password123", is_confirmed=True, confirmed_on=datetime.now())
